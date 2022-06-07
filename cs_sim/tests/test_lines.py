@@ -1,6 +1,6 @@
 import pytest
 
-from ..lines import generate_img_with_lines
+from cs_sim.synth.lines import generate_img_with_lines
 
 
 @pytest.fixture(scope='module', params=[dict(size=10, n_lines=10, maxval=255),
