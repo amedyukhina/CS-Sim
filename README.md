@@ -51,3 +51,29 @@ from cs_sim.corrupt import corrupt_image
 img_corr = corrupt_image(img, corruption_steps)
 ```
 
+### Save parameters to a json file for batch processing
+
+```angular2html
+import json
+
+params_synth_data = dict(
+    imgshape=(20, 100, 100),
+    n_lines=10,
+    maxval=255,
+    nval=100
+)
+
+with open('parameters_synth_data.json', 'w') as f:
+    json.dump(params_synth_data, f, indent=4)
+
+corruption_steps = [
+    ('perlin_noise', {'size': 50, 'value': 0.1}),
+    ('poisson_noise', {'snr': 2}),
+    ('convolve', {'sigma': 2}),
+    ('gaussian_noise', {'snr': 100})
+]
+
+with open('corruption_steps.json', 'w') as f:
+    json.dump(corruption_steps, f, indent=4)
+```
+
