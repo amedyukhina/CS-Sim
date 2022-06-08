@@ -8,6 +8,13 @@ Currently, only generates straight lines. Option for curved lines will be added 
 <img src="img/example.png" width="500">
 
 
+## Installation
+
+```angular2html
+pip install git+https://github.com/amedyukhina/CS-Sim.git
+```
+
+
 ## Usage
 
 See the [demo notebook](demo.ipynb) for details.
