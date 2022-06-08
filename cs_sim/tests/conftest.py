@@ -14,9 +14,10 @@ def line_params(request):
 
 @pytest.fixture(scope='module')
 def line_imgs(line_params):
-    params = line_params.copy()
-    size = params.pop('size')
-    img = generate_img_with_lines(imgshape=[size] * 3, **params)
+    size = line_params['size']
+    img = generate_img_with_lines(imgshape=[size] * 3,
+                                  **{key: line_params[key] for key in line_params.keys()
+                                     if key != 'size'})
     return img
 
 
