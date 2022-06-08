@@ -1,7 +1,7 @@
 import numpy as np
-from scipy.signal import fftconvolve
+from ..corrupt.conv import convolve
 
 
 def test_gauss(line_imgs, gauss_kernels):
-    img = fftconvolve(line_imgs * 1., gauss_kernels * 1., mode='same')
+    img = convolve(line_imgs, gauss_kernels)
     assert np.max(img) > 0
