@@ -98,3 +98,13 @@ with open('corruption_steps.json') as f:
     corr_steps = json.load(f)
 batch_corrupt_image('test_input', 'test_output', corr_steps, n_jobs=10)
 ```
+
+#### Using the scripts
+
+```angular2html
+python scripts/batch_generate_img_with_lines.py -p parameters_synth_data.json -o test_input -n 10
+```
+
+```angular2html
+python scripts/batch_corrupt_images.py -p corruption_steps.json -i test_input -o test_output
+```
