@@ -1,7 +1,9 @@
 import pytest
 
 from cs_sim.synth.lines import generate_img_with_lines
+from ..corrupt.conv import convolve
 from ..corrupt.kernels import gaussian_kernel
+from ..corrupt.noise import gaussian_noise, poisson_noise, perlin_noise
 
 
 @pytest.fixture(scope='module', params=[dict(size=10, n_lines=10, maxval=255),
@@ -24,3 +26,13 @@ def line_imgs(line_params):
 def gauss_kernels(request):
     kernel = gaussian_kernel([request.param] * 3)
     return kernel
+
+
+@pytest.fixture(scope='module')
+def corruption_steps():
+    return [
+        (perlin_noise, {'size': 50, 'value': 0.1}),
+        (poisson_noise, {'snr': 2}),
+        (convolve, {'sigma': 2}),
+        (gaussian_noise, {'snr': 100})
+    ]
