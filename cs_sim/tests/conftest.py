@@ -1,9 +1,9 @@
 import pytest
 
-from cs_sim.synth.lines import generate_img_with_lines
 from ..corrupt.conv import convolve
 from ..corrupt.kernels import gaussian_kernel
 from ..corrupt.noise import gaussian_noise, poisson_noise, perlin_noise
+from ..synth.lines import generate_img_with_lines
 
 
 @pytest.fixture(scope='module', params=[dict(size=10, n_lines=10, maxval=255),
