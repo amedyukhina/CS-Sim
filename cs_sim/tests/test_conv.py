@@ -21,4 +21,4 @@ def test_gauss_with_sigma(line_imgs, sigmas):
 
 def test_conv_error(line_imgs):
     with pytest.raises(ValueError):
-        img = convolve(line_imgs)
+        convolve(line_imgs)
