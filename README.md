@@ -77,3 +77,24 @@ with open('corruption_steps.json', 'w') as f:
     json.dump(corruption_steps, f, indent=4)
 ```
 
+### Batch processing
+
+#### Generating synthetic images
+
+```angular2html
+from cs_sim.batch.batch_synth import batch_generate_img_with_lines
+
+with open('parameters_synth_data.json') as f:
+    params = json.load(f)
+batch_generate_img_with_lines(n_img=10, n_jobs=10, dir_out='test_input', **params)
+```
+
+#### Corrupting the images
+
+```angular2html
+from cs_sim.batch.batch_corrupt import batch_corrupt_image
+
+with open('corruption_steps.json') as f:
+    corr_steps = json.load(f)
+batch_corrupt_image('test_input', 'test_output', corr_steps, n_jobs=10)
+```
