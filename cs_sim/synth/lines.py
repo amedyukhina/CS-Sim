@@ -3,7 +3,7 @@ from skimage import morphology
 
 
 def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
-                            instance=False, thick=False, rgb=False):
+                            instance=False, thick=False):
     """
     Generate an image with straight lines.
     The start and the end of each line are chosen randomly.
@@ -31,10 +31,6 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
     thick : bool, optional
         If True, will dilate the lines image to get thicker lines.
         Default is False.
-    rgb : bool, optional
-        If True, will return an RGB image.
-        If False, will return a gray-scale image.
-        Default is False.
 
     Returns
     -------
@@ -51,6 +47,4 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
         img[tuple(np.int_(np.round_(coords)))] = curval
     if thick:
         img = morphology.dilation(img)
-    if rgb:
-        img = np.moveaxis(np.array([img]*3), 0, -1)
     return img
