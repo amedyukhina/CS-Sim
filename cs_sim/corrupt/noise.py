@@ -42,7 +42,7 @@ def perlin_noise(img, size, value, zoom=1):
         im = img
     space_range = np.array(im.shape) / np.array(size)
 
-    pnf = PerlinNoiseFactory(3, octaves=1, unbias=True, tile=space_range)
+    pnf = PerlinNoiseFactory(len(img.shape), octaves=1, unbias=True, tile=space_range)
     noise_img = np.zeros(im.shape)
     for z in range(im.shape[0]):
         for y in range(im.shape[1]):
