@@ -1,7 +1,9 @@
 import numpy as np
+from skimage import morphology
 
 
-def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100):
+def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
+                            instance=False, thick=False, rgb=False):
     """
     Generate an image with straight lines.
     The start and the end of each line are chosen randomly.
@@ -23,12 +25,21 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100):
         Should be on the order of image size.
         Increase if lines get disconnected.
         Default is 100.
+    instance : bool, optional
+        If True, assign unique intensity value to each line.
+        Default is False.
+    thick : bool, optional
+        If True, will dilate the lines image to get thicker lines.
+        Default is False.
+    rgb : bool, optional
+        If True, will return an RGB image.
+        If False, will return a gray-scale image.
+        Default is False.
 
     Returns
     -------
     np.ndarray:
-        Binary image with straight lines.
-
+        Image with straight lines.
     """
     img = np.zeros(imgshape)
     for i in range(n_lines):
@@ -36,5 +47,10 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100):
         for j in range(len(imgshape)):
             inds = np.random.randint(0, imgshape[j], 2)
             coords.append(np.linspace(inds[0], inds[1], n_points, endpoint=True))
-        img[tuple(np.int_(np.round_(coords)))] = maxval
+        curval = i + 1 if instance else maxval
+        img[tuple(np.int_(np.round_(coords)))] = curval
+    if thick:
+        img = morphology.dilation(img)
+    if rgb:
+        img = np.moveaxis(np.array([img]*3), 0, -1)
     return img
