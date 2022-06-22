@@ -1,3 +1,4 @@
+import itertools
 import warnings
 
 import numpy as np
@@ -42,13 +43,12 @@ def perlin_noise(img, size, value, zoom=1):
         im = img
     space_range = np.array(im.shape) / np.array(size)
 
-    pnf = PerlinNoiseFactory(len(img.shape), octaves=1, unbias=True, tile=space_range)
+    pnf = PerlinNoiseFactory(len(im.shape), octaves=1, unbias=True, tile=space_range)
     noise_img = np.zeros(im.shape)
-    for z in range(im.shape[0]):
-        for y in range(im.shape[1]):
-            for x in range(im.shape[2]):
-                n = pnf(*np.array([z, y, x]) / np.array(size))
-                noise_img[z, y, x] = int((n + 1) / 2 * 255 + 0.5)
+    for coord in itertools.product(*[np.arange(im.shape[i])
+                                     for i in range(len(im.shape))]):
+        n = pnf(*np.array(coord) / np.array(size))
+        noise_img[coord] = int((n + 1) / 2 * 255 + 0.5)
     noise_img = noise_img / noise_img.max() * img.max() * value
     img = img + ndimage.interpolation.zoom(noise_img,
                                            zoom=np.array(img.shape) / np.array(noise_img.shape),
