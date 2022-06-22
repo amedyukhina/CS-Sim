@@ -4,7 +4,8 @@ from scipy.signal import fftconvolve
 from .kernels import gaussian_kernel
 
 
-def convolve(img, psf=None, sigma=None, ndim=3, mode='same'):
+def convolve(img, psf=None, sigma=None, mode='same'):
+    ndim = len(img.shape)
     if psf is None:
         if sigma is not None:
             sigma = np.ravel([sigma])
