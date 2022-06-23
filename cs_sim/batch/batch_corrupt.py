@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -30,7 +31,10 @@ def batch_corrupt_image(dir_in, dir_out, corruption_steps, n_jobs=1):
         img = io.imread(fn_in)
         dtype = np.dtype(img.max())
         img = corrupt_image(img, corr_stps)
-        io.imsave(fn_out, img.astype(dtype))
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            io.imsave(fn_out, img.astype(dtype))
 
     fns = os.listdir(dir_in)
     fns_in = [os.path.join(dir_in, fn) for fn in fns]

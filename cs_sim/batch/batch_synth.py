@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import numpy as np
 from joblib import Parallel, delayed
@@ -45,7 +46,10 @@ def batch_generate_img_with_lines(n_img, dir_out, fn_base='line_img', fn_ext='.t
 
     def __process(fn_out, **kwargs):
         img = generate_img_with_lines(**kwargs)
-        io.imsave(fn_out, img.astype(__get_type(img)))
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            io.imsave(fn_out, img.astype(__get_type(img)))
 
     fns = [os.path.join(dir_out, rf"{fn_base}_{i:05d}{fn_ext}") for i in range(n_img)]
 
