@@ -2,7 +2,7 @@ import numpy as np
 from skimage import morphology
 
 
-def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
+def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=None,
                             instance=False, thick=False):
     """
     Generate an image with straight lines.
@@ -24,7 +24,8 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
         Number of points to represent each line.
         Should be on the order of image size.
         Increase if lines get disconnected.
-        Default is 100.
+        If None, the number of points is set to 2x the image dimension.
+        Default is None.
     instance : bool, optional
         If True, assign unique intensity value to each line.
         Default is False.
@@ -37,6 +38,8 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=100,
     np.ndarray:
         Image with straight lines.
     """
+    if n_points is None:
+        n_points = 2 * np.max(imgshape)
     img = np.zeros(imgshape)
     for i in range(n_lines):
         coords = []
