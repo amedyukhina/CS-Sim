@@ -1,6 +1,7 @@
 import numpy as np
-from cs_sim.corrupt.noise import gaussian_noise, poisson_noise, perlin_noise
+
 from cs_sim.corrupt.conv import convolve
+from cs_sim.corrupt.noise import gaussian_noise, poisson_noise, perlin_noise
 
 AVAILABLE_STEPS = [perlin_noise, poisson_noise, gaussian_noise, convolve]
 

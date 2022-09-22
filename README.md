@@ -1,19 +1,17 @@
 # CS-Sim: synthetic images with curvilinear structures
 
-Package for generating synthetic images with curvilinear structures, 
-and corrupting them with noise, background, and blur.
+Package for generating synthetic images with curvilinear structures, and corrupting them with noise, background, and
+blur.
 
 Currently, only generates straight lines. Option for curved lines will be added later.
 
 <img src="img/example.png" width="500">
-
 
 ## Installation
 
 ```angular2html
 pip install git+https://github.com/amedyukhina/CS-Sim.git
 ```
-
 
 ## Usage
 
@@ -33,8 +31,10 @@ img = generate_img_with_filaments(imgshape=(20, 100, 100), n_filaments=10, maxva
 
 There are 4 steps that can be combined in any order:
 
-1. Perlin noise: adds low-frequency background. The `size` parameter specifies the size of the low-frequency pattern (in pixels), the `value` parameter specifies the amplitude.
-2. Convolve: convolves the image with either a specified PSF image (`psf` parameter), or with a gaussian kernel of specified `sigma`. 
+1. Perlin noise: adds low-frequency background. The `size` parameter specifies the size of the low-frequency pattern (in
+   pixels), the `value` parameter specifies the amplitude.
+2. Convolve: convolves the image with either a specified PSF image (`psf` parameter), or with a gaussian kernel of
+   specified `sigma`.
 3. Poisson noise, with specified `snr`.
 4. Gaussian noise, with specified `snr`.
 
