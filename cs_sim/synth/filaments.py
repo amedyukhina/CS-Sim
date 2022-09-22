@@ -2,7 +2,7 @@ import numpy as np
 from skimage import morphology
 
 
-def generate_img_with_filaments(imgshape, curve_type='line', n_filaments=10, maxval=255, n_points=None,
+def generate_img_with_filaments(imgshape, curve_type='sine_curve', n_filaments=10, maxval=255, n_points=None,
                                 instance=False, thick=False, **curve_kwargs):
     """
     Generate an image with straight lines.
@@ -48,7 +48,7 @@ def generate_img_with_filaments(imgshape, curve_type='line', n_filaments=10, max
     elif curve_type == 'sine_curve':
         get_coords = get_sine_curve_coords
     else:
-        raise ValueError("Invalid value for curve_type!")
+        raise ValueError("Invalid value for curve_type! Must be 'line' or 'sine_curve'")
     if n_points is None:
         n_points = 2 * np.max(imgshape)
     img = np.zeros(imgshape)

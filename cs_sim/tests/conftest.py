@@ -4,11 +4,11 @@ from ..corrupt.kernels import gaussian_kernel
 from ..synth.filaments import generate_img_with_filaments
 
 
-@pytest.fixture(scope='module', params=[dict(size=10, n_filaments=10, maxval=255),
+@pytest.fixture(scope='module', params=[dict(curve_type='line', size=10, n_filaments=10, maxval=255),
                                         dict(curve_type='sine_curve', size=10, n_filaments=10, maxval=255),
-                                        dict(size=70, n_filaments=15, maxval=20),
-                                        dict(size=50, n_filaments=20, maxval=16244),
-                                        dict(size=20, n_filaments=10, maxval=1)])
+                                        dict(curve_type='line', size=70, n_filaments=15, maxval=20),
+                                        dict(curve_type='sine_curve', size=50, n_filaments=20, maxval=16244),
+                                        dict(curve_type='line', size=20, n_filaments=10, maxval=1)])
 def curve_params(request):
     return request.param
 
