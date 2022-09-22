@@ -14,10 +14,10 @@ def curve_params(request):
 
 
 @pytest.fixture(scope='module')
-def line_imgs(line_params):
-    size = line_params['size']
+def line_imgs(curve_params):
+    size = curve_params['size']
     img = generate_img_with_filaments(imgshape=[size] * 3,
-                                      **{key: line_params[key] for key in line_params.keys()
+                                      **{key: curve_params[key] for key in curve_params.keys()
                                          if key != 'size'})
     return img
 
