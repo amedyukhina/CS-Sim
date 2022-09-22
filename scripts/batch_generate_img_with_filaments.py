@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from cs_sim.batch.batch_synth import batch_generate_img_with_lines
+from cs_sim.batch.batch_synth import batch_generate_img_with_filaments
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -21,6 +21,6 @@ if __name__ == '__main__':
     print(params)
     print('\n')
 
-    batch_generate_img_with_lines(n_img=args.n_img, dir_out=args.output_dir,
-                                  fn_base=args.fn_base, fn_ext=args.ext, n_jobs=args.n_jobs,
-                                  **params)
+    batch_generate_img_with_filaments(n_img=args.n_img, dir_out=args.output_dir,
+                                      fn_base=args.fn_base, fn_ext=args.ext, n_jobs=args.n_jobs,
+                                      **params)

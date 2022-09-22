@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from cs_sim.synth.lines import generate_img_with_lines
+from cs_sim.synth.filaments import generate_img_with_filaments
 from ..corrupt.noise import poisson_noise, gaussian_noise, perlin_noise
 
 
@@ -31,6 +31,6 @@ def test_poisson_noise(snr, line_imgs):
 
 
 def test_perlin_noise(perlin_size, perlin_value):
-    line_img = generate_img_with_lines([10] * 3)
+    line_img = generate_img_with_filaments([10] * 3)
     imgf = perlin_noise(line_img, perlin_size, perlin_value)
     assert np.min(imgf) >= 0

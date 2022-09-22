@@ -22,9 +22,9 @@ See the [demo notebook](demo.ipynb) for details.
 ### Generate synthetic image
 
 ```
-from cs_sim.synth.lines import generate_img_with_lines
+from cs_sim.synth.filaments import generate_img_with_filaments
 
-img = generate_img_with_lines(imgshape=(20, 100, 100), n_lines=10, maxval=255)
+img = generate_img_with_filaments(imgshape=(20, 100, 100), n_filaments=10, maxval=255)
 ```
 
 ### Corrupt image with noise, blur and background
@@ -39,14 +39,12 @@ There are 4 steps that can be combined in any order:
 4. Gaussian noise, with specified `snr`.
 
 ```
-from cs_sim.corrupt.noise import gaussian_noise, poisson_noise, perlin_noise
-from cs_sim.corrupt.conv import convolve
 
 corruption_steps = [
-    (perlin_noise, {'size': 50, 'value': 0.1}),
-    (poisson_noise, {'snr': 2}),
-    (convolve, {'sigma': 2}),
-    (gaussian_noise, {'snr': 100})
+    ('perlin_noise', {'size': 50, 'value': 0.1}),
+    ('poisson_noise', {'snr': 2}),
+    ('convolve', {'sigma': 2}),
+    ('gaussian_noise', {'snr': 100})
 ]
 ```
 
@@ -65,7 +63,7 @@ import json
 
 params_synth_data = dict(
     imgshape=(20, 100, 100),
-    n_lines=10,
+    n_filaments=10,
     maxval=255,
     nval=100
 )
@@ -89,11 +87,11 @@ with open('corruption_steps.json', 'w') as f:
 #### Generating synthetic images
 
 ```angular2html
-from cs_sim.batch.batch_synth import batch_generate_img_with_lines
+from cs_sim.batch.batch_synth import batch_generate_img_with_filaments
 
 with open('parameters_synth_data.json') as f:
     params = json.load(f)
-batch_generate_img_with_lines(n_img=10, n_jobs=10, dir_out='test_input', **params)
+batch_generate_img_with_filaments(n_img=10, n_jobs=10, dir_out='test_input', **params)
 ```
 
 #### Corrupting the images
@@ -109,7 +107,7 @@ batch_corrupt_image('test_input', 'test_output', corr_steps, n_jobs=10)
 #### Using the scripts
 
 ```angular2html
-python scripts/batch_generate_img_with_lines.py -p parameters_synth_data.json -o test_input -n 10
+python scripts/batch_generate_img_with_filaments.py -p parameters_synth_data.json -o test_input -n 10
 ```
 
 ```angular2html

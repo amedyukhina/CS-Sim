@@ -5,7 +5,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from skimage import io
 
-from ..synth.lines import generate_img_with_lines
+from ..synth.filaments import generate_img_with_filaments
 
 
 def __get_type(img):
@@ -18,8 +18,8 @@ def __get_type(img):
         return np.uint16
 
 
-def batch_generate_img_with_lines(n_img, dir_out, fn_base='line_img', fn_ext='.tif',
-                                  n_jobs=1, **params):
+def batch_generate_img_with_filaments(n_img, dir_out, fn_base='line_img', fn_ext='.tif',
+                                      n_jobs=1, **params):
     """
     Generate given number of images with straight lines with given parameters and save to a given directory.
 
@@ -45,7 +45,7 @@ def batch_generate_img_with_lines(n_img, dir_out, fn_base='line_img', fn_ext='.t
     os.makedirs(dir_out, exist_ok=True)
 
     def __process(fn_out, **kwargs):
-        img = generate_img_with_lines(**kwargs)
+        img = generate_img_with_filaments(**kwargs)
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")

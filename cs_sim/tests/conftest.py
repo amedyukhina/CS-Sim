@@ -1,13 +1,13 @@
 import pytest
 
 from ..corrupt.kernels import gaussian_kernel
-from ..synth.lines import generate_img_with_lines
+from ..synth.filaments import generate_img_with_filaments
 
 
-@pytest.fixture(scope='module', params=[dict(size=10, n_lines=10, maxval=255),
-                                        dict(size=70, n_lines=15, maxval=20),
-                                        dict(size=50, n_lines=20, maxval=16244),
-                                        dict(size=20, n_lines=10, maxval=1)])
+@pytest.fixture(scope='module', params=[dict(size=10, n_filaments=10, maxval=255),
+                                        dict(size=70, n_filaments=15, maxval=20),
+                                        dict(size=50, n_filaments=20, maxval=16244),
+                                        dict(size=20, n_filaments=10, maxval=1)])
 def line_params(request):
     return request.param
 
@@ -15,8 +15,8 @@ def line_params(request):
 @pytest.fixture(scope='module')
 def line_imgs(line_params):
     size = line_params['size']
-    img = generate_img_with_lines(imgshape=[size] * 3,
-                                  **{key: line_params[key] for key in line_params.keys()
+    img = generate_img_with_filaments(imgshape=[size] * 3,
+                                      **{key: line_params[key] for key in line_params.keys()
                                      if key != 'size'})
     return img
 

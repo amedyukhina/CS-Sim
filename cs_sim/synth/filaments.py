@@ -2,8 +2,8 @@ import numpy as np
 from skimage import morphology
 
 
-def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=None,
-                            instance=False, thick=False):
+def generate_img_with_filaments(imgshape, curve_type='line', n_filaments=10, maxval=255, n_points=None,
+                                instance=False, thick=False):
     """
     Generate an image with straight lines.
     The start and the end of each line are chosen randomly.
@@ -14,8 +14,11 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=None,
     imgshape : tuple
         Image shape.
         The number of inputs should correspond to the number of dimensions.
-    n_lines : int, optional
-        Number of lines to generate.
+    curve_type : str
+        Type of the curve ('line' or 'curve').
+        Default is 'line'.
+    n_filaments : int, optional
+        Number of filaments to generate.
         Default is 10.
     maxval : scalar, optional
         The value to be assigned to the lines/foreground (the background value is 0).
@@ -38,16 +41,22 @@ def generate_img_with_lines(imgshape, n_lines=10, maxval=255, n_points=None,
     np.ndarray:
         Image with straight lines.
     """
+    if curve_type == 'line':
+        get_coords = get_line_coords
+    else:
+        raise ValueError("Invalid value for curve_type!")
     if n_points is None:
         n_points = 2 * np.max(imgshape)
     img = np.zeros(imgshape)
-    for i in range(n_lines):
-        coords = []
-        for j in range(len(imgshape)):
-            inds = np.random.randint(0, imgshape[j], 2)
-            coords.append(np.linspace(inds[0], inds[1], n_points, endpoint=True))
+    for i in range(n_filaments):
+        start, stop = np.array([np.random.randint(0, s, 2) for s in imgshape]).transpose()
+        coords = get_coords(start, stop, n_points)
         curval = i + 1 if instance else maxval
-        img[tuple(np.int_(np.round_(coords)))] = curval
+        img[tuple(np.int_(np.round_(coords.transpose())))] = curval
     if thick:
         img = morphology.dilation(img)
     return img
+
+
+def get_line_coords(start, stop, n_points):
+    return np.linspace(start, stop, n_points, endpoint=True)
