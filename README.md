@@ -3,7 +3,7 @@
 Package for generating synthetic images with curvilinear structures, and corrupting them with noise, background, and
 blur.
 
-Currently, only generates straight lines. Option for curved lines will be added later.
+The images are intended to be used as ground truth for filament- and curvilinear-structure-detection methods.
 
 <img src="img/example.png" width="500">
 
