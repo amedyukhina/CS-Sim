@@ -17,8 +17,9 @@ def generate_img_with_filaments(imgshape, curve_type='sine_curve', n_filaments=1
     curve_type : str
         Type of the curve ('line' or 'curve').
         Default is 'line'.
-    n_filaments : int, optional
+    n_filaments : int or tuple, optional
         Number of filaments to generate.
+        If tuple, the number of filaments will be drawn randomly from the given range.
         Default is 10.
     maxval : scalar, optional
         The value to be assigned to the lines/foreground (the background value is 0).
@@ -51,8 +52,13 @@ def generate_img_with_filaments(imgshape, curve_type='sine_curve', n_filaments=1
         raise ValueError("Invalid value for curve_type! Must be 'line' or 'sine_curve'")
     if n_points is None:
         n_points = 2 * np.max(imgshape)
+    n_filaments = np.ravel([n_filaments])
+    if len(n_filaments) == 1:
+        nfil = n_filaments[0]
+    else:
+        nfil = np.random.randint(n_filaments[0], n_filaments[1] + 1)
     img = np.zeros(imgshape)
-    for i in range(n_filaments):
+    for i in range(nfil):
         start, stop = np.array([np.random.randint(0, s, 2) for s in imgshape]).transpose()
         coords = get_coords(start, stop, n_points, **curve_kwargs)
         coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
