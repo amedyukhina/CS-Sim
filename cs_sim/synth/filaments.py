@@ -80,29 +80,32 @@ def get_line_coords(start, stop, n_points, **_):
     return np.linspace(start, stop, n_points, endpoint=True)
 
 
-def get_sine_curve_coords(start, stop, n_points, n_sines=10,
-                          k_range=0.1, a_range=1, w_range=1, shift_amplitude=10):
+def get_sine_curve_coords(start, stop, n_points, n_sines=10, kmin=0.2, kmax=0.8, shift_amplitude=10):
     vectors = get_ortho_vectors(start, stop)
-    curves = [get_sine_curve(n_points, a_range, k_range, w_range, n_sines=n_sines) for _ in range(len(vectors))]
+    curves = [get_sine_curve(n_points, n_sines=n_sines, kmin=kmin, kmax=kmax) for _ in range(len(vectors))]
     shifts = [curve.reshape((-1, 1)) @ vector.reshape((1, -1)) * shift_amplitude for curve, vector in
               zip(curves, vectors)]
     coords = np.linspace(start, stop, n_points, endpoint=True) + np.stack(shifts).sum(0)
     return coords
 
 
-def get_sine_curve(n_points, a_range, k_range, w_range, n_sines=10):
+def get_sine_curve(n_points, n_sines=10, kmin=0.2, kmax=0.8):
     """
     Return a sum of `n_sines` sine waves specified by the sine function: A sine(Kt+W).
-    A, K, and W are drawn randomly from a uniform distribution [-range, range),
-    where "range" is a parameter (`a_range`, `k_range`, and `w_range` respectively).
+    A is drawn randomly from the range [-1, 1].
+    W is drawn randomly from the range [-pi, pi]
+    K is drawn randomly from the range [-2 * pi * kmin, 2 * pi * kmax], where kmin and kmax are user defined
     """
-    t = np.arange(n_points)
-    k = (np.random.rand(n_sines) - 0.5) * k_range
-    a = (np.random.rand(n_sines) - 0.5) * a_range
-    w = (np.random.rand(n_sines) - 0.5) * w_range
+    t = np.arange(n_points) / n_points
+
+    kmin = np.pi * 2 * kmin
+    kmax = np.pi * 2 * kmax
+    k = np.random.rand(n_sines) * (kmax - kmin) + kmin
+    a = (np.random.rand(n_sines) - 0.5) * 2
+    w = (np.random.rand(n_sines) - 0.5) * np.pi / 2
 
     x = np.array([a[i] * np.sin(k[i] * t + w[i]) for i in range(n_sines)])
-    return np.sum(x, axis=0)
+    return np.sum(x, axis=0) / np.sum(a)
 
 
 def get_ortho_vectors(start, stop):
