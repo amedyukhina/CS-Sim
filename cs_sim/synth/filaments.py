@@ -1,9 +1,10 @@
 import numpy as np
 from skimage import morphology
+from scipy.spatial import distance
 
 
-def generate_img_with_filaments(imgshape, margin=0, curve_type='sine_curve', n_filaments=10, maxval=255, n_points=None,
-                                instance=False, thick=False, **curve_kwargs):
+def generate_img_with_filaments(imgshape, margin=0, curve_type='sine_curve', distribution='random', n_filaments=10,
+                                maxval=255, n_points=None, instance=False, thick=False, **curve_kwargs):
     """
     Generate an image with straight lines.
     The start and the end of each line are chosen randomly.
@@ -20,6 +21,9 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='sine_curve', n_f
     curve_type : str
         Type of the curve ('line' or 'curve').
         Default is 'line'.
+    distribution : str
+        Distribution of filaments ('random' or 'aster').
+        Default is 'random'.
     n_filaments : int or tuple, optional
         Number of filaments to generate.
         If tuple, the number of filaments will be drawn randomly from the given range.
@@ -53,6 +57,14 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='sine_curve', n_f
         get_coords = get_sine_curve_coords
     else:
         raise ValueError("Invalid value for curve_type! Must be 'line' or 'sine_curve'")
+
+    if distribution == 'random':
+        generate_coords = generate_random
+    elif distribution == 'aster':
+        generate_coords = generate_aster
+    else:
+        raise ValueError("Invalid value for distribution! Must be 'random' or 'aster'")
+
     if n_points is None:
         n_points = 2 * np.max(imgshape)
     n_filaments = np.ravel([n_filaments])
@@ -60,16 +72,49 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='sine_curve', n_f
         nfil = n_filaments[0]
     else:
         nfil = np.random.randint(n_filaments[0], n_filaments[1] + 1)
+
+    coords, values = generate_coords(imgshape, margin, nfil, n_points,
+                                     get_coords, instance, maxval, **curve_kwargs)
     img = np.zeros(imgshape)
+    for coord, val in zip(coords, values):
+        img[coord] = val
+    if thick:
+        img = morphology.dilation(img)
+    return img
+
+
+def generate_random(imgshape, margin, nfil, n_points, get_coords, instance, maxval, **curve_kwargs):
+    all_coords = []
+    values = []
     for i in range(nfil):
         start, stop = np.array([np.random.randint(margin, s - margin, 2) for s in imgshape]).transpose()
         coords = get_coords(start, stop, n_points, **curve_kwargs)
         coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
         curval = i + 1 if instance else maxval
-        img[tuple(coords.transpose())] = curval
-    if thick:
-        img = morphology.dilation(img)
-    return img
+        all_coords.append(tuple(coords.transpose()))
+        values.append(curval)
+
+    return all_coords, values
+
+
+def generate_aster(imgshape, margin, nfil, n_points, get_coords, instance, maxval,
+                   minlen=None, discard_fraction=0.1, **curve_kwargs):
+    if minlen is None:
+        minlen = int(imgshape[0] / 20)
+    all_coords = []
+    values = []
+    start = np.array([np.random.randint(margin, s - margin, 1) for s in imgshape]).ravel()
+    for i in range(nfil):
+        stop = start.copy()
+        while distance.euclidean(start, stop) < minlen:
+            stop = np.array([np.random.randint(margin, s - margin, 1) for s in imgshape]).ravel()
+        coords = get_coords(start, stop, n_points, **curve_kwargs)
+        coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
+        coords = coords[int(n_points * discard_fraction):]
+        curval = i + 1 if instance else maxval
+        all_coords.append(tuple(coords.transpose()))
+        values.append(curval)
+    return all_coords, values
 
 
 def remove_out_of_shape(coords, imgshape):
@@ -83,7 +128,7 @@ def get_line_coords(start, stop, n_points, **_):
     return np.linspace(start, stop, n_points, endpoint=True)
 
 
-def get_sine_curve_coords(start, stop, n_points, n_sines=10, kmin=0.2, kmax=0.8, shift_amplitude=10):
+def get_sine_curve_coords(start, stop, n_points, n_sines=10, kmin=0.2, kmax=0.8, shift_amplitude=10, **_):
     vectors = get_ortho_vectors(start, stop)
     curves = [get_sine_curve(n_points, n_sines=n_sines, kmin=kmin, kmax=kmax) for _ in range(len(vectors))]
     shifts = [curve.reshape((-1, 1)) @ vector.reshape((1, -1)) * shift_amplitude for curve, vector in
