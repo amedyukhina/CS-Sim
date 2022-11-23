@@ -2,7 +2,7 @@ import numpy as np
 from skimage import morphology
 
 
-def generate_img_with_filaments(imgshape, curve_type='sine_curve', n_filaments=10, maxval=255, n_points=None,
+def generate_img_with_filaments(imgshape, margin=0, curve_type='sine_curve', n_filaments=10, maxval=255, n_points=None,
                                 instance=False, thick=False, **curve_kwargs):
     """
     Generate an image with straight lines.
@@ -14,6 +14,9 @@ def generate_img_with_filaments(imgshape, curve_type='sine_curve', n_filaments=1
     imgshape : tuple
         Image shape.
         The number of inputs should correspond to the number of dimensions.
+    margin : int, optional
+        Margin at the edge of the image to to keep clear of the filaments.
+        Default is 0.
     curve_type : str
         Type of the curve ('line' or 'curve').
         Default is 'line'.
@@ -59,7 +62,7 @@ def generate_img_with_filaments(imgshape, curve_type='sine_curve', n_filaments=1
         nfil = np.random.randint(n_filaments[0], n_filaments[1] + 1)
     img = np.zeros(imgshape)
     for i in range(nfil):
-        start, stop = np.array([np.random.randint(0, s, 2) for s in imgshape]).transpose()
+        start, stop = np.array([np.random.randint(margin, s - margin, 2) for s in imgshape]).transpose()
         coords = get_coords(start, stop, n_points, **curve_kwargs)
         coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
         curval = i + 1 if instance else maxval
