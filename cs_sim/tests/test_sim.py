@@ -1,5 +1,6 @@
-from cs_sim.synth.filaments import generate_img_with_filaments
 import pytest
+
+from cs_sim.synth.filaments import generate_img_with_filaments
 
 
 @pytest.fixture(params=[2, 3])
