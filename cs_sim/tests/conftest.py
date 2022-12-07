@@ -1,6 +1,5 @@
 import pytest
 
-from ..corrupt.kernels import gaussian_kernel
 from ..synth.filaments import generate_img_with_filaments
 
 
@@ -30,9 +29,8 @@ def line_imgs(curve_params):
 
 
 @pytest.fixture(scope='module', params=[1, 2, 5, 10])
-def gauss_kernels(request):
-    kernel = gaussian_kernel([request.param] * 3)
-    return kernel
+def gauss_kernel_size(request):
+    return request.param
 
 
 @pytest.fixture(scope='module')
