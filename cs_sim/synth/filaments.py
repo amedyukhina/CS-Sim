@@ -119,13 +119,41 @@ def generate_aster(imgshape, margin, nfil, n_points, get_coords, instance, maxva
         stop = start.copy()
         while distance.euclidean(start, stop) < minlen:
             stop = np.array([np.random.randint(margin, s - margin, 1) for s in imgshape]).ravel()
-        coords = get_coords(start, stop, n_points, **curve_kwargs)
-        coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
-        coords = coords[int(n_points * discard_fraction):]
-        curval = i + 1 if instance else maxval
+        coords, curval = _get_coords_and_vals(get_coords, i, imgshape, start, stop, n_points, instance, maxval,
+                                              discard_fraction, **curve_kwargs)
         all_coords.append(tuple(coords.transpose()))
         values.append(curval)
     return all_coords, values
+
+
+def generate_aster_directed(imgshape, center, get_coords, nfil, r_mean, direction, angle_range=100,
+                            r_std=0.1, jitter=5, n_points=300, instance=True, maxval=255,
+                            minrad=10, discard_fraction=0.1, **curve_kwargs):
+    all_coords = []
+    values = []
+    for i in range(nfil):
+        a = to_radians(direction + np.random.rand() * 2 * angle_range - angle_range)
+        r = max(minrad, np.random.normal(r_mean, r_mean * r_std))
+        start = np.array([c + np.random.randint(-jitter, jitter, 1) for c in center]).ravel()
+        stop = np.int_(np.round_([r * np.sin(a) + start[0], r * np.cos(a) + start[1]]))
+        coords, curval = _get_coords_and_vals(get_coords, i, imgshape, start, stop, n_points, instance, maxval,
+                                              discard_fraction, **curve_kwargs)
+        all_coords.append(tuple(coords.transpose()))
+        values.append(curval)
+    return all_coords, values
+
+
+def to_radians(x):
+    return x / 180. * np.pi
+
+
+def _get_coords_and_vals(get_coords, i, imgshape, start, stop, n_points, instance, maxval,
+                         discard_fraction, **curve_kwargs):
+    coords = get_coords(start, stop, n_points, **curve_kwargs)
+    coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
+    coords = coords[int(n_points * discard_fraction):]
+    curval = i + 1 if instance else maxval
+    return coords, curval
 
 
 def remove_out_of_shape(coords, imgshape):
