@@ -15,7 +15,8 @@ def test_filaments(curve_params, dim):
                                          if key != 'size'})
     assert img.max() == curve_params['maxval']
     assert img.min() == 0
-    if dim == 2 or curve_params['curve_type'] == 'bezier':
+    if dim == 2 or curve_params['curve_type'] == 'bezier' or \
+            ('distribution' in curve_params.keys() and curve_params['distribution'] == 'aster'):
         assert img.shape == (size, size)
     else:
         assert img.shape == (size, size, size)

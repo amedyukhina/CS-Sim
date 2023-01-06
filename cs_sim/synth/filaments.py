@@ -1,7 +1,6 @@
 import warnings
 
 import numpy as np
-from scipy.spatial import distance
 from skimage import morphology
 
 from .bezier import get_bezier_curve_coords
@@ -10,7 +9,7 @@ from .sine import get_sine_curve_coords
 
 
 def generate_img_with_filaments(imgshape, margin=0, curve_type='line', distribution='random', n_filaments=10,
-                                maxval=255, n_points=None, instance=False, thick=False, **curve_kwargs):
+                                maxval=255, n_points=None, instance=False, thick=False, **kwargs):
     """
     Generate an image with straight lines.
     The start and the end of each line are chosen randomly.
@@ -49,8 +48,8 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='line', distribut
     thick : bool, optional
         If True, will dilate the lines image to get thicker lines.
         Default is False.
-    curve_kwargs : key value
-        Parameters for the curve generation function
+    kwargs : key value
+        Parameters for the curve generation function and aster generation
 
     Returns
     -------
@@ -63,9 +62,6 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='line', distribut
         get_coords = get_sine_curve_coords
     elif curve_type == 'bezier':
         get_coords = get_bezier_curve_coords
-        if len(imgshape) > 2:
-            warnings.warn('Bezier curves for 3D are not yet supported. Generating 2D instead.')
-            imgshape = imgshape[-2:]
     else:
         raise ValueError("Invalid value for curve_type! Must be 'line' or 'sine_curve'")
 
@@ -76,6 +72,11 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='line', distribut
     else:
         raise ValueError("Invalid value for distribution! Must be 'random' or 'aster'")
 
+    if curve_type == 'bezier' or distribution == 'aster':
+        if len(imgshape) > 2:
+            warnings.warn('Bezier curves and aster distribution for 3D are not yet supported. Generating 2D instead.')
+            imgshape = imgshape[-2:]
+
     if n_points is None:
         n_points = 2 * np.max(imgshape)
     n_filaments = np.ravel([n_filaments])
@@ -85,7 +86,7 @@ def generate_img_with_filaments(imgshape, margin=0, curve_type='line', distribut
         nfil = np.random.randint(n_filaments[0], n_filaments[1] + 1)
 
     coords, values = generate_coords(imgshape, margin, nfil, n_points,
-                                     get_coords, instance, maxval, **curve_kwargs)
+                                     get_coords, instance, maxval, **kwargs)
     img = np.zeros(imgshape)
     for coord, val in zip(coords, values):
         img[coord] = val
@@ -109,35 +110,39 @@ def generate_random(imgshape, margin, nfil, n_points, get_coords, instance, maxv
 
 
 def generate_aster(imgshape, margin, nfil, n_points, get_coords, instance, maxval,
-                   minlen=None, discard_fraction=0.1, **curve_kwargs):
-    if minlen is None:
-        minlen = int(imgshape[0] / 20)
+                   minlen=5, discard_fraction=0.1, jitter=0,
+                   center=None, r_mean=None, r_std=0.1, direction=None, angle_range=None,
+                   **curve_kwargs):
     all_coords = []
     values = []
-    start = np.array([np.random.randint(margin, s - margin, 1) for s in imgshape]).ravel()
-    for i in range(nfil):
-        stop = start.copy()
-        while distance.euclidean(start, stop) < minlen:
-            stop = np.array([np.random.randint(margin, s - margin, 1) for s in imgshape]).ravel()
-        coords, curval = _get_coords_and_vals(get_coords, i, imgshape, start, stop, n_points, instance, maxval,
-                                              discard_fraction, **curve_kwargs)
-        all_coords.append(tuple(coords.transpose()))
-        values.append(curval)
-    return all_coords, values
 
+    if center is None:  # if center is not define, select randomly within margins
+        center = np.array([np.random.randint(margin, s - margin, 1) for s in imgshape]).ravel()
+    if direction is None:
+        direction = 0
+    if angle_range is None:  # if angle range is not defined, use all angles
+        angle_range = 180
 
-def generate_aster_directed(imgshape, center, get_coords, nfil, r_mean, direction, angle_range=100,
-                            r_std=0.1, jitter=5, n_points=300, instance=True, maxval=255,
-                            minrad=10, discard_fraction=0.1, **curve_kwargs):
-    all_coords = []
-    values = []
     for i in range(nfil):
+        # start point
+        start = np.array([c + np.random.randint(-jitter, jitter + 1, 1) for c in center]).ravel()
+
+        # angle and radius
         a = to_radians(direction + np.random.rand() * 2 * angle_range - angle_range)
-        r = max(minrad, np.random.normal(r_mean, r_mean * r_std))
-        start = np.array([c + np.random.randint(-jitter, jitter, 1) for c in center]).ravel()
+        if r_mean is None:
+            r = np.random.rand() * (imgshape[0] / 2 - minlen) + minlen
+        else:
+            r = max(minlen, np.random.normal(r_mean, r_mean * r_std))
+
+        # generate the end point from angle and radius, make sure it within the image border
         stop = np.int_(np.round_([r * np.sin(a) + start[0], r * np.cos(a) + start[1]]))
-        coords, curval = _get_coords_and_vals(get_coords, i, imgshape, start, stop, n_points, instance, maxval,
-                                              discard_fraction, **curve_kwargs)
+        stop = np.stack([np.stack([stop, np.array(imgshape) - 1]).min(0), np.zeros_like(stop)]).max(0)
+
+        # get the entire curve coordinates, remove out of border, discard some start coordinates
+        coords = get_coords(start, stop, n_points, **curve_kwargs)
+        coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
+        coords = coords[int(n_points * discard_fraction):]
+        curval = i + 1 if instance else maxval
         all_coords.append(tuple(coords.transpose()))
         values.append(curval)
     return all_coords, values
@@ -145,15 +150,6 @@ def generate_aster_directed(imgshape, center, get_coords, nfil, r_mean, directio
 
 def to_radians(x):
     return x / 180. * np.pi
-
-
-def _get_coords_and_vals(get_coords, i, imgshape, start, stop, n_points, instance, maxval,
-                         discard_fraction, **curve_kwargs):
-    coords = get_coords(start, stop, n_points, **curve_kwargs)
-    coords = remove_out_of_shape(np.int_(np.round_(coords)), imgshape)
-    coords = coords[int(n_points * discard_fraction):]
-    curval = i + 1 if instance else maxval
-    return coords, curval
 
 
 def remove_out_of_shape(coords, imgshape):
