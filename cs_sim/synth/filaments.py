@@ -110,7 +110,7 @@ def generate_random(imgshape, margin, nfil, n_points, get_coords, instance, maxv
 
 
 def generate_aster(imgshape, margin, nfil, n_points, get_coords, instance, maxval,
-                   minlen=5, discard_fraction=0.1, jitter=0,
+                   minlen=5, discard_fraction=0.1, jitter=0, rshift=0,
                    center=None, r_mean=None, r_std=0.1, direction=None, angle_range=None,
                    **curve_kwargs):
     all_coords = []
@@ -134,6 +134,8 @@ def generate_aster(imgshape, margin, nfil, n_points, get_coords, instance, maxva
         else:
             r = max(minlen, np.random.normal(r_mean, r_mean * r_std))
 
+        r = r + rshift
+        start = np.int_(np.round_([rshift * np.sin(a) + start[0], rshift * np.cos(a) + start[1]]))
         # generate the end point from angle and radius, make sure it within the image border
         stop = np.int_(np.round_([r * np.sin(a) + start[0], r * np.cos(a) + start[1]]))
         stop = np.stack([np.stack([stop, np.array(imgshape) - 1]).min(0), np.zeros_like(stop)]).max(0)
