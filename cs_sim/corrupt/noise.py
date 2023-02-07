@@ -53,6 +53,5 @@ def perlin_noise(img, size, value, zoom=1):
     img = img + ndimage.interpolation.zoom(noise_img,
                                            zoom=np.array(img.shape) / np.array(noise_img.shape),
                                            order=1)
-    img = img - np.min(img)
-    img = img * 255. / img.max()
+    img = img / (value + 1)
     return img
