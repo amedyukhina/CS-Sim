@@ -9,8 +9,10 @@ AVAILABLE_STEPS = [perlin_noise, poisson_noise, gaussian_noise, convolve]
 def corrupt_image(img, corruption_steps):
     if len(np.unique(img)) > 2 and img.dtype.name in ['uint16', 'uint8']:
         img = (img > 0) * 255.
+        maxval = np.max(img)
+    else:
+        maxval = None
     img = img.astype(float)
-    maxval = np.max(img)
     for func, params in corruption_steps:
         if type(func) is str:
             funcs = [f for f in AVAILABLE_STEPS if f.__name__ == func]
@@ -21,7 +23,8 @@ def corrupt_image(img, corruption_steps):
                                  rf"{[f.__name__ for f in AVAILABLE_STEPS]}")
         img = func(img, **params)
 
-    img = img - np.min(img)
-    img = img * maxval / np.max(img)
+    if maxval is not None:
+        img = img - np.min(img)
+        img = img * maxval / np.max(img)
 
     return img
