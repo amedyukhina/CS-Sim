@@ -13,5 +13,5 @@ def gaussian_kernel(sigma, scale: int = 4):
     kernel = np.zeros(size)  # create an empty array
     kernel[tuple(np.int_(size / 2))] = 255.  # create a peak in the center of the kernel
     kernel = ndimage.gaussian_filter(kernel, sigma)  # smooth the peak with a Gaussian
-    kernel = kernel / np.max(kernel)  # normalize the kernel
+    kernel = kernel / np.sum(kernel)  # normalize the kernel
     return kernel
