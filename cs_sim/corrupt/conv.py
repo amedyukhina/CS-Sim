@@ -14,7 +14,6 @@ def convolve(img, psf=None, sigma=None, mode='same'):
             psf = gaussian_kernel(sigma)
         else:
             raise ValueError("Either psf or sigma must be provided")
-    maxval = np.max(img)
     imgf = fftconvolve(img * 1., psf * 1., mode=mode)
 
-    return imgf * maxval / imgf.max()
+    return imgf
